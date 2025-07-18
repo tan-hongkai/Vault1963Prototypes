@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Discover Your NP Vibe & Alumni Match</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #014689;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .quiz-box {
+      background: #fff;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 700px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 100%;
+    }
+
+    #progress {
+      margin-bottom: 20px;
+      text-align: right;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    #question {
+      margin-bottom: 20px;
+      color: #014689;
+    }
+
+    .option {
+      background: #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 22px;
+      margin: 8px 0;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .option:hover {
+      background: #cbd5e0;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    button {
+      background: linear-gradient(135deg, #014689 0%, #0a5aa3 100%);
+      color: #feb041;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(1, 70, 137, 0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(1, 70, 137, 0.3);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    #result {
+      text-align: center;
+    }
+
+    #result h2 {
+      color: #014689;
+    }
+
+    #result p {
+      font-size: 1.1rem;
+    }
+
+    #ml-status {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+      display: none;
+    }
+
+    .ml-processing {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #014689, #0a5aa3);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .confidence-score {
+      margin-top: 15px;
+      padding: 10px;
+      background: #e3f2fd;
+      border-radius: 6px;
+      border-left: 4px solid #014689;
+    }
+
+    .ml-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .metric {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .metric-value {
+      font-weight: bold;
+      color: #014689;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Discover Your NP Vibe & Alumni Match</h1>
+    <p><em>Powered by advanced Machine Learning personality clustering (v1)</em></p>
+  </div>
+
+  <div class="quiz-box">
+    <div id="progress"></div>
+    <h2 id="question"></h2>
+    <div id="options"></div>
+    <div class="nav-buttons">
+      <button id="backBtn" onclick="goBack()">Back</button>
+    </div>
+    <div id="ml-processing" class="ml-processing" style="display: none;">
+      <h3>Analysis in Progress</h3>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div id="ml-steps"></div>
+    </div>
+    <div id="result"></div>
+  </div>
+
+  <script src="quiz.js"></script>
+
+</body>
+</html>
