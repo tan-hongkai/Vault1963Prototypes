@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Talking Statue</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #014689;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header p {
+      color: #666;
+      font-size: 1.1rem;
+      margin: 10px 0;
+    }
+
+    .talk-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    #talk-button {
+      background: linear-gradient(135deg, #014689 0%, #0a5aa3 100%);
+      color: #feb041;
+      border: none;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(1, 70, 137, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    #talk-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 35px rgba(1, 70, 137, 0.4);
+    }
+
+    #talk-button:active {
+      transform: scale(0.98);
+    }
+
+    .instructions {
+      text-align: center;
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      max-width: 500px;
+    }
+
+    .instructions h3 {
+      color: #014689;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+
+    .instructions p {
+      color: #666;
+      line-height: 1.6;
+      margin: 10px 0;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: #014689;
+      text-align: center;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      max-width: 600px;
+    }
+
+    .user-speech {
+      background: rgba(254, 176, 65, 0.1);
+      border-left: 4px solid #feb041;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-style: italic;
+    }
+
+    .statue-response {
+      background: rgba(1, 70, 137, 0.1);
+      border-left: 4px solid #014689;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-weight: 500;
+    }
+
+    .recording {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .wave {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 260px;
+      height: 260px;
+      border: 3px solid rgba(254, 176, 65, 0.3);
+      border-radius: 50%;
+      animation: wave-animation 2s infinite;
+      opacity: 0;
+      pointer-events: none;
+      display: none;
+    }
+
+    @keyframes wave-animation {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+      100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+    }
+
+    .warning {
+      background: rgba(255, 193, 7, 0.1);
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Talking Statue</h1>
+    <p>Powered by Vault1963</p>
+  </div>
+
+  <div class="talk-container">
+    <button id="talk-button">Press to Talk</button>
+    <div class="wave" id="wave"></div>
+  </div>
+
+  <div class="instructions">
+    <h3>How to Use:</h3>
+    <p><strong>Step 1:</strong> Press the button for me to start listening</p>
+    <p><strong>Step 2:</strong> Speak clearly into your microphone</p>
+    <p><strong>Step 3:</strong> The statue will respond automatically</p>
+    <p><strong>Note:</strong> Uses your browser's built-in speech recognition</p>
+  </div>
+
+  <div id="status">Hi! I'm a statue of Professor Liu Yin Soon, the first principal of Ngee Ann College. Ready to listen!</div>
+
+  <script>
+    const button = document.getElementById('talk-button');
+    const status = document.getElementById('status');
+    const wave = document.getElementById('wave');
+
+    let recognition;
+    let isListening = false;
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+      recognition.maxAlternatives = 1;
+      
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        const confidence = event.results[0][0].confidence;
+        
+        status.innerHTML = `
+          <div class="user-speech">
+            <strong>You said:</strong> "${transcript}"
+            <br><small>Confidence: ${Math.round(confidence * 100)}%</small>
+          </div>
+          <div>🤔 <strong>Thinking...</strong> Let me process your question.</div>
+        `;
+
+        // Get response
+        getFlaskReply(transcript);
+      };
+
+      recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        let errorMessage = 'Speech recognition error: ';
+        
+        switch(event.error) {
+          case 'no-speech':
+            errorMessage += 'No speech detected. Please try again.';
+            break;
+          case 'audio-capture':
+            errorMessage += 'Audio capture failed. Check your microphone.';
+            break;
+          case 'not-allowed':
+            errorMessage += 'Microphone access denied. Please allow microphone access.';
+            break;
+          case 'network':
+            errorMessage += 'Network error. Please check your connection.';
+            break;
+          default:
+            errorMessage += event.error;
+        }
+        
+        status.innerHTML = `❌ <strong>Error:</strong> ${errorMessage}`;
+        stopListening();
+      };
+
+      recognition.onend = function() {
+        stopListening();
+      };
+
+    } else {
+      status.innerHTML = `
+        <div class="warning">
+          ⚠️ <strong>Browser not supported:</strong> 
+          Your browser doesn't support speech recognition. 
+          Please use Chrome, Edge, or Safari for the best experience.
+        </div>
+      `;
+    }
+
+    button.addEventListener('click', () => {
+      if (!isListening && recognition) {
+        startListening();
+      } else if (isListening) {
+        recognition.stop();
+      }
+    });
+
+    function startListening() {
+      if (!recognition) return;
+      
+      try {
+        recognition.start();
+        isListening = true;
+        button.classList.add('recording');
+        wave.style.display = 'block';
+        button.innerHTML = 'Listening...';
+        status.innerHTML = '🎤 <strong>Listening...</strong><br><div style="text-align: center;">Speak clearly now!</div>';
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+        status.innerHTML = '❌ <strong>Error:</strong> Could not start speech recognition.';
+      }
+    }
+
+    function stopListening() {
+      isListening = false;
+      button.classList.remove('recording');
+      wave.style.display = 'none';
+      button.innerHTML = 'Press to Talk';
+    }
+
+    async function getFlaskReply(userText) {
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: userText
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        status.innerHTML = `
+          <div class="user-speech">
+            <strong>You said:</strong> "${userText}"
+          </div>
+          <div class="statue-response">
+            ${data.reply}
+          </div>
+        `;
+        
+        speak(data.reply);
+
+      } catch (error) {
+        console.error('Flask API error:', error);
+        const errorReply = "Sorry, I cannot think right now. Please try again.";
+        
+        status.innerHTML = `
+          <div class="user-speech">
+            <strong>You said:</strong> "${userText}"
+          </div>
+          <div class="statue-response">
+            ${errorReply}
+          </div>
+        `;
+        
+        speak(errorReply);
+      }
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      function chooseVoice() {
+        const voices = speechSynthesis.getVoices();
+
+        console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+
+        const preferredNames = ['Samantha'];
+
+        let femaleVoice = voices.find(voice =>
+          preferredNames.some(name => voice.name.toLowerCase().includes(name.toLowerCase()))
+        );
+
+        if (!femaleVoice) {
+          femaleVoice = voices.find(voice => 
+            voice.lang.startsWith('en') && voice.name.toLowerCase().includes('female')
+          );
+        }
+
+        if (!femaleVoice) {
+          femaleVoice = voices.find(voice => voice.lang.startsWith('en'));
+        }
+
+        if (femaleVoice) {
+          utterance.voice = femaleVoice;
+        }
+
+        speechSynthesis.speak(utterance);
+      }
+      if (speechSynthesis.getVoices().length === 0) {
+        speechSynthesis.onvoiceschanged = chooseVoice;
+      } else {
+        chooseVoice();
+      }
+    }
+  </script>
+</body>
+</html>
